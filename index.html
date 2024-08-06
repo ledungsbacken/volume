@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Volume</title>
+  </head>
+  <body>
+	<div>
+		<span id="volume">{{.}}</span>
+	</div>
+	<div>
+		<div>
+			<button id="down">down<span id="downerror"></span></button>
+		</div>
+		<div>
+			<button id="up">up<span id="uperror"></span></button>
+		</div>
+	</div>
+	<script>
+		document.getElementById('down').addEventListener('click', async function() {
+			let response;
+			try {
+				response = await fetch('/down');
+			} catch (error) {
+				document.getElementById('downerror').innerText = error;
+				return;
+			}
+			if (!response.ok) {
+				document.getElementById('downerror').innerText = response.statusText;
+				return;
+			}
+			const volume = await response.text();
+			document.getElementById('volume').innerText = volume;
+			document.getElementById('downerror').innerText = '';
+			document.getElementById('uperror').innerText = '';
+		});
+		document.getElementById('up').addEventListener('click', async function() {
+			let response;
+			try {
+				response = await fetch('/up');
+			} catch (error) {
+				document.getElementById('uperror').innerText = error;
+				return;
+			}
+			if (!response.ok) {
+				document.getElementById('uperror').innerText = response.statusText;
+				return;
+			}
+			const volume = await response.text();
+			document.getElementById('volume').innerText = volume;
+			document.getElementById('downerror').innerText = '';
+			document.getElementById('uperror').innerText = '';
+		});
+
+		let isUpdating = false;
+		async function updateVolume() {
+			if (isUpdating) {
+				return;
+			}
+			isUpdating = true;
+			let response;
+			try {
+				response = await fetch('/volume');
+			} catch (error) {
+				isUpdating = false;
+				return;
+			}
+			const volume = await response.text();
+			document.getElementById('volume').innerText = volume;
+			isUpdating = false;
+		}
+
+		setInterval(updateVolume, 1000);
+	</script>
+  </body>
+</html>
